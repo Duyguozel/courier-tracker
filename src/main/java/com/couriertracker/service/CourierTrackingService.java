@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -31,6 +32,7 @@ public class CourierTrackingService {
     private final Map<String, CourierLocation> lastLocationByCourier = new ConcurrentHashMap<>();
     private final Map<String, Double> totalDistanceMetersByCourier = new ConcurrentHashMap<>();
     private final Map<String, Instant> lastEntranceTimeByCourierAndStore = new ConcurrentHashMap<>();
+    private final Set<String> couriersInsideStores = ConcurrentHashMap.newKeySet();
     private final List<StoreEntranceLog> entranceLogs = new CopyOnWriteArrayList<>();
 
     public CourierTrackingService(
@@ -74,17 +76,26 @@ public class CourierTrackingService {
                         store.lng()
                 );
 
-                if (distanceToStore <= storeRadiusMeters && canLogEntrance(courierId, store.name(), currentLocation.time())) {
-                    StoreEntranceLog logEntry = new StoreEntranceLog(
-                            courierId,
-                            store.name(),
-                            currentLocation.time(),
-                            distanceToStore
-                    );
-                    entranceLogs.add(logEntry);
-                    newlyLoggedEntrances.add(logEntry);
-                    notifyListeners(new CourierEntranceEvent(logEntry));
+                String key = courierId + "::" + store.name();
+                if (distanceToStore > storeRadiusMeters) {
+                    couriersInsideStores.remove(key);
+                    continue;
                 }
+
+                if (!couriersInsideStores.add(key)
+                        || !canLogEntrance(courierId, store.name(), currentLocation.time())) {
+                    continue;
+                }
+
+                StoreEntranceLog logEntry = new StoreEntranceLog(
+                        courierId,
+                        store.name(),
+                        currentLocation.time(),
+                        distanceToStore
+                );
+                entranceLogs.add(logEntry);
+                newlyLoggedEntrances.add(logEntry);
+                notifyListeners(new CourierEntranceEvent(logEntry));
             }
         }
 

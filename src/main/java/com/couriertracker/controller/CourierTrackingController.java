@@ -33,9 +33,8 @@ public class CourierTrackingController {
 
     @PostMapping("/locations")
     public ResponseEntity<List<EntranceLogResponse>> ingestLocation(@Valid @RequestBody LocationEventRequest request) {
-        Instant timestamp = request.time() != null ? request.time() : Instant.now();
         CourierLocation location = new CourierLocation(
-                timestamp,
+                request.time(),
                 request.courier().trim(),
                 request.lat(),
                 request.lng()
@@ -50,7 +49,8 @@ public class CourierTrackingController {
     }
 
     @GetMapping("/couriers/{courierId}/distance")
-    public ResponseEntity<TravelDistanceResponse> getTotalTravelDistance(@PathVariable String courierId) {
+    public ResponseEntity<TravelDistanceResponse> getTotalTravelDistance(
+            @PathVariable("courierId") String courierId) {
         Double totalMeters = trackingService.getTotalTravelDistance(courierId);
         return ResponseEntity.ok(new TravelDistanceResponse(
                 courierId,
@@ -61,7 +61,7 @@ public class CourierTrackingController {
 
     @GetMapping("/entrances")
     public ResponseEntity<List<EntranceLogResponse>> getEntrances(
-            @RequestParam(required = false) String courierId) {
+            @RequestParam(name = "courierId", required = false) String courierId) {
         List<EntranceLogResponse> logs = trackingService.getEntranceLogs(courierId).stream()
                 .map(EntranceLogResponse::from)
                 .toList();
