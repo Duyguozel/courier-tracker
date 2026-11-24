@@ -1,0 +1,8 @@
+server:
+  port: 8080
+
+courier:
+  tracking:
+    store-radius-meters: 100.0
+    reentry-cooldown-seconds: 60
+    stores-file-path: classpath:stores.json
