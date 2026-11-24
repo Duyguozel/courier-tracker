@@ -1,6 +1,6 @@
 # Courier Tracker
 
-Kurye konumlarını alan, 100 metre yarıçapındaki Migros mağazalarına girişleri kaydeden ve kuryelerin toplam seyahat mesafelerini hesaplayan Spring Boot REST API.
+Kurye konumlarını alan, 100 metre yarıçapındaki mağazalara girişleri kaydeden ve kuryelerin toplam seyahat mesafelerini hesaplayan Spring Boot REST API.
 
 ## Gereksinimler
 
